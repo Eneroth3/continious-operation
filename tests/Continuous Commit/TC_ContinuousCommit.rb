@@ -1,9 +1,9 @@
 require 'testup/testcase'
 require_relative "../../continuous_commit.rb"
 
-class TC_ContinuousCommit < TestUp::TestCase
+class TC_OperationSequence < TestUp::TestCase
 
-  ContinuousCommit = ContinuousCommitLib::ContinuousCommit
+  OperationSequence = OperationSequenceLib::OperationSequence
 
   def setup
     # ...
@@ -17,17 +17,13 @@ class TC_ContinuousCommit < TestUp::TestCase
 
   def test_commit
     model = Sketchup.active_model
-    cc = ContinuousCommit.new(name: "Draw CPoints")
-    cc.start
-
-    # REVIEW: Is there a cleaner way to move up a local variable out of code block?
+    os = OperationSequence.new("Draw CPoints")
+    os.start
     cp = nil
-
-    cc.start_operation do
+    os.start_operation do
       cp = model.entities.add_cpoint(ORIGIN)
     end
-
-    cc.start_operation do
+    os.start_operation do
      model.entities.add_cpoint(ORIGIN)
     end
 
@@ -41,19 +37,16 @@ class TC_ContinuousCommit < TestUp::TestCase
 
   def test_commit_Interupted
     model = Sketchup.active_model
-    cc = ContinuousCommit.new(name: "Draw CPoints")
-    cc.start
+    os = OperationSequence.new("Draw CPoints")
+    os.start
 
     cp1 = nil
-    cp3 = nil
-
-    cc.start_operation do
+    os.start_operation do
       cp1 = model.entities.add_cpoint(ORIGIN)
     end
-
     cp2 = model.entities.add_cpoint(ORIGIN)
-
-    cc.start_operation do
+    cp3 = nil
+    os.start_operation do
      cp3 = model.entities.add_cpoint(ORIGIN)
     end
 

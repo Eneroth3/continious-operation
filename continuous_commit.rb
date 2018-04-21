@@ -1,43 +1,21 @@
-module ContinuousCommitLib
+module OperationSequenceLib
 
-# Create a stream of model operations that are all merged into one in the undo
-# stack. Can be used when there are several changes to the model performed
-# subsequently, e.g. on each key down in a dialog, to avoid numerous entries in
-# the undo stack.
+# Define a sequence of operations.
 #
-# If another action is performed during the continuous commit it resets and
-# breaks and a new stream of commits is stared.
+# Each subsequent operation in the same sequence is made transparent to the
+# previous one (merged into one undo stack entry) unless an operation outside of
+# the sequence was performed in between, or the sequence was explicitly
+# interrupted.
 #
-# Useful for actions carried out repeatedly from HTML dialog, e.g. on each key
-# press, to avoid flooding the undo stack, while still allowing the user to
-# perform separate actions to the model without these different kinds of
-# operation merging.
-#
-# TODO: Look over documentation and naming, and figure out where operation,
-# transaction and commit should be used.
-class ContinuousCommit
+# This can be useful to allow multiple small changes, e.g. on each individual
+# key press in a text input, without flooding the undo stack.
+class OperationSequence
 
-  def initialize(name:)
-    @name = name
-    @make_trans_to_prev = false
-    @caused_current_transcation = false
-    @observers = Observers.new(self)
-  end
-
-  def start_operation
-    model = Sketchup.active_model
-    model.start_operation(@name, true, false, @make_trans_to_prev)
-
-    if block_given?
-      yield
-      commit_operation
-    end
-  end
-
-  # TODO: Can operation be started and committed separately?
+  # Commit an individual operation started by `#start_operation`.
+  #
+  # @return [Void]
   def commit_operation
     @caused_current_transcation = true
-    #UI.start_timer(0) { @caused_current_transcation = false }
 
     model = Sketchup.active_model
     model.commit_operation
@@ -48,31 +26,60 @@ class ContinuousCommit
     nil
   end
 
-  # Reset continuity. The following commits will not be made transparent into
-  # the one performed prior to this point.
+  # Initialize a new operation sequence.
+  #
+  # @param op_name [String] The name of the operation(s) in the undo stack.
+  def initialize(op_name)
+    @op_name = op_name
+    @make_trans_to_prev = false
+    @caused_current_transcation = false
+    @observers = Observers.new(self)
+  end
+
+  # Prevent next operation from being transparent to the previous one (merged
+  # into one undo stack entry).
   #
   # @return [Void]
-  def reset
+  def interrupt
     @make_trans_to_prev = false
 
     nil
   end
 
-  # Start listening to model operations and reset the continuous operation in
-  # the case of an independent operation being carried out. Do this before
-  # making commits.
+  # Start listen to model transactions and interrupt the sequence if an outside
+  # transaction is performed. Call this before starting an individual operation,
+  # e.g. when the UI calling the sequential operations is shown.
   #
   # @return [Void]
-  #
-  # REVIEW: Call bake into initialize?
   def start
+    @make_trans_to_prev = false
     @observers.observe_app
 
     nil
   end
 
-  # Stop listening to model operations. Do this when there will not be more
-  # commits in this stream.
+  # Start an individual operation within the sequence. Call this before making
+  # changes to the model. Either explicitly call `#commit_operation` when the
+  # changes are done, or call this method with a code block to implicitly commit
+  # the operation when the block ends.
+  #
+  # @return [Void]
+  def start_operation
+    model = Sketchup.active_model
+    model.start_operation(@op_name, true, false, @make_trans_to_prev)
+
+    if block_given?
+      yield
+      commit_operation
+    end
+
+    nil
+  end
+
+  # Stop listening to model operations. Call this when there will not be any
+  # sequential operations for some time, e.g. when the UI calling them is
+  # closed. `start` can later be called on the same operation sequence, e.g. if
+  # the UI is shown again.
   #
   # @return [Void]
   def stop
@@ -83,19 +90,26 @@ class ContinuousCommit
 
   #-----------------------------------------------------------------------------
 
+  # Called from observers whenever a transaction is committed to the model
+  # (between #start and #stop).
+  #
   # @private
   def on_model_transaction
     return if @caused_current_transcation
-    reset
+    interrupt
 
     nil
   end
 
+  # Wrapper for adding and removing observers.
+  # REVIEW: Make a separate interface for observers that automatically gets
+  # added when new models are opened.
+  #
   # @private
   class Observers
 
-    def initialize(cc)
-      @cc = cc
+    def initialize(os)
+      @os = os
     end
 
     def observe_app
@@ -116,7 +130,7 @@ class ContinuousCommit
     end
 
     def observe_model(model)
-      @model_observer ||= ModelObserver.new(@cc)
+      @model_observer ||= ModelObserver.new(@os)
       model.remove_observer(@model_observer)
       model.add_observer(@model_observer)
 
@@ -159,20 +173,20 @@ class ContinuousCommit
 
     class ModelObserver < Sketchup::ModelObserver
 
-      def initialize(cc)
-        @cc = cc
+      def initialize(os)
+        @os = os
       end
 
       def onTransactionCommit(_)
-        @cc.on_model_transaction
+        @os.on_model_transaction
       end
 
       def onTransactionRedo(_)
-        @cc.on_model_transaction
+        @os.on_model_transaction
       end
 
       def onTransactionUndo(_)
-        @cc.on_model_transaction
+        @os.on_model_transaction
       end
 
     end
