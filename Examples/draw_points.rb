@@ -21,11 +21,11 @@ module DrawPoints
   @os = OperationSequence.new("Points")
   @dlg = nil
 
-  # Draw a guide point in the center of the view.
+  # Draw a guide point somewhere in the view.
   def self.draw_point
     model = Sketchup.active_model
     view = model.active_view
-    @ip.pick(view, view.vpwidth / 2, view.vpheight / 2)
+    @ip.pick(view, rand(view.vpwidth), rand(view.vpheight))
     point = @ip.position
 
     model.active_entities.add_cpoint(point)
