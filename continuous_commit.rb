@@ -37,11 +37,12 @@ class ContinuousCommit
   # TODO: Can operation be started and committed separately?
   def commit_operation
     @caused_current_transcation = true
-    UI.start_timer(0) { @caused_current_transcation = false }
+    #UI.start_timer(0) { @caused_current_transcation = false }
 
     model = Sketchup.active_model
     model.commit_operation
 
+    @caused_current_transcation = false
     @make_trans_to_prev = true
 
     nil
