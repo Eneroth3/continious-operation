@@ -157,20 +157,14 @@ class OperationSequence
       end
 
       def onActivateModel(model)
-        on_activate_model(model)
+        @observers.observe_model(model)
       end
 
       def onNewModel(model)
-        on_activate_model(model)
+        @observers.observe_model(model)
       end
 
       def onOpenModel(model)
-        on_activate_model(model)
-      end
-
-      private
-
-      def on_activate_model(model)
         @observers.observe_model(model)
       end
 
