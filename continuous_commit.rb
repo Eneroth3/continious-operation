@@ -46,6 +46,11 @@ class OperationSequence
     nil
   end
 
+  # @private
+  def interupt
+    raise NoMethodError, "It is spelled interrupt. inter-rupt. inter. Rupt."
+  end
+
   # Start listen to model transactions and interrupt the sequence if an outside
   # transaction is performed. Call this before starting an individual operation,
   # e.g. when the UI calling the sequential operations is shown.
