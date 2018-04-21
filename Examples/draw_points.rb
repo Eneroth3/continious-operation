@@ -1,6 +1,6 @@
 require_relative "../continuous_commit.rb"
 
-module ContinuousCommit
+module ContinuousCommitLib
 module Examples
 module DrawPoints
 

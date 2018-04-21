@@ -2,7 +2,7 @@ require 'testup/testcase'
 
 class TC_ContinuousCommit < TestUp::TestCase
 
-  ContinuousCommit = ContinuousCommit::ContinuousCommit
+  ContinuousCommit = ContinuousCommitLib::ContinuousCommit
 
   def setup
     # ...

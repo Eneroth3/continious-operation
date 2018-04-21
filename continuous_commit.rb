@@ -1,4 +1,4 @@
-module ContinuousCommit
+module ContinuousCommitLib
 
 # Create a stream of model operations that are all merged into one in the undo
 # stack. Can be used when there are several changes to the model performed
