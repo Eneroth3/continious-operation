@@ -1,4 +1,5 @@
 require 'testup/testcase'
+require_relative "../../continuous_commit.rb"
 
 class TC_ContinuousCommit < TestUp::TestCase
 
