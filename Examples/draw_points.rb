@@ -2,6 +2,11 @@ require_relative "../tools/loader.rb"
 
 module OperationSequenceLib
 module Examples
+
+# Example of OperationSequence.
+#
+# Adds a HTML dialog opened from *Extensions > Operation Sequence Example*
+# that lets you draw randomly placed points in an operation sequence.
 module DrawPoints
 
   INSTRUCTIONS =
@@ -38,7 +43,10 @@ module DrawPoints
     @os.start_operation { draw_point }
   end
 
+  # Open the dialog containing from where the user can draw points.
   def self.show_dialog
+    # Wait to start listening to model transactions that potentially interrupt
+    # the operation sequence until the user opens the HTML dialog.
     @os.start
 
     if @dlg && @dlg.visible?
@@ -47,6 +55,7 @@ module DrawPoints
       @dlg ||= UI::HtmlDialog.new(dialog_title: "OperationSequence Example")
       @dlg.set_html(HTML)
       @dlg.add_action_callback("draw") { sequential_point_draw }
+      # Stop listening to model transactions as the dialog closes.
       @dlg.set_on_closed { @os.stop }
       @dlg.show
     end
@@ -55,7 +64,7 @@ module DrawPoints
   end
 
   menu = UI.menu("Plugins")
-  menu.add_item("Continuous Operation Example") { show_dialog }
+  menu.add_item("Operation Sequence Example") { show_dialog }
 
 end
 end

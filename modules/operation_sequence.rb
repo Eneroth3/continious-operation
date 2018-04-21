@@ -9,6 +9,21 @@ module OperationSequenceLib
 #
 # This can be useful to allow multiple small changes, e.g. on each individual
 # key press in a text input, without flooding the undo stack.
+#
+# @example
+#   os = OperationSequenceLib::OperationSequence.new("Draw Point")
+#   os.start
+#   ip = Sketchup::InputPoint.new
+#   UI.menu("Plugins").add_item("Draw Point") do
+#     os.start_operation do
+#       model = Sketchup.active_model
+#       view = model.active_view
+#       # Find random point within view.
+#       ip.pick(view, rand(view.vpwidth), rand(view.vpheight))
+#       point = ip.position
+#       model.active_entities.add_cpoint(point)
+#     end
+#   end
 class OperationSequence
 
   # Commit an individual operation started by `#start_operation`.
