@@ -99,7 +99,7 @@ class ContinuousCommit
     end
 
     def observe_app
-      @app_observer ||= AppObserver.new(@cc)
+      @app_observer ||= AppObserver.new(self)
       Sketchup.remove_observer(@app_observer)
       Sketchup.add_observer(@app_observer)
       observe_model(Sketchup.active_model)
@@ -133,8 +133,8 @@ class ContinuousCommit
 
     class AppObserver < Sketchup::AppObserver
 
-      def initialize(cc)
-        @cc = cc
+      def initialize(observers)
+        @observers = observers
       end
 
       def onActivateModel(model)
@@ -152,7 +152,7 @@ class ContinuousCommit
       private
 
       def on_activate_model(model)
-        Observers.observe_model(model)
+        @observers.observe_model(model)
       end
 
     end
