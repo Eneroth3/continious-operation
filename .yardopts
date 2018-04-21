@@ -1,0 +1,2 @@
+modules/*.rb
+--no-private
