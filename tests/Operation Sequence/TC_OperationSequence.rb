@@ -1,5 +1,5 @@
 require 'testup/testcase'
-require_relative "../../continuous_commit.rb"
+require_relative "../../tools/loader.rb"
 
 class TC_OperationSequence < TestUp::TestCase
 

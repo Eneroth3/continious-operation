@@ -1,4 +1,4 @@
-require_relative "../continuous_commit.rb"
+require_relative "../tools/loader.rb"
 
 module OperationSequenceLib
 module Examples
