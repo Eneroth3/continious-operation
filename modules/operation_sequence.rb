@@ -3,12 +3,16 @@ module OperationSequenceLib
 # Define a sequence of operations.
 #
 # Each subsequent operation in the same sequence is made transparent to the
-# previous one (merged into one undo stack entry) unless an operation outside of
-# the sequence was performed in between, or the sequence was explicitly
-# interrupted.
+# previous one (seemingly merged into one undo stack entry) unless an operation
+# outside of the sequence was performed in between, or the sequence was
+# explicitly interrupted.
 #
 # This can be useful to allow multiple small changes, e.g. on each individual
 # key press in a text input, without flooding the undo stack.
+#
+# Note that SketchUp's undo stack only contains 100 operations, and that
+# transparent (chained) operations count separately, even if they to the user
+# appear as one.
 #
 # @example
 #   os = OperationSequenceLib::OperationSequence.new("Draw Point")
@@ -51,8 +55,8 @@ class OperationSequence
     @observers = Observers.new(self)
   end
 
-  # Prevent next operation from being transparent to the previous one (merged
-  # into one undo stack entry).
+  # Prevent next operation from being transparent to the previous one (seemingly
+  # merged into one undo stack entry).
   #
   # @return [Void]
   def interrupt
@@ -68,7 +72,7 @@ class OperationSequence
 
   # Start listen to model transactions and interrupt the sequence if an outside
   # transaction is performed. Call this before starting an individual operation,
-  # e.g. when the UI calling the sequential operations is shown.
+  # e.g. when the UI performing the sequential operations is shown.
   #
   # @return [Void]
   def start
@@ -96,10 +100,10 @@ class OperationSequence
     nil
   end
 
-  # Stop listening to model operations. Call this when there will not be any
-  # sequential operations for some time, e.g. when the UI calling them is
-  # closed. `start` can later be called on the same operation sequence, e.g. if
-  # the UI is shown again.
+  # Stop listening to model operations. Call this to free up resources when
+  # there will not be any sequential operations for some time, e.g. when the UI
+  # for performing them is closed. `start` can later be called on the same
+  # operation sequence, e.g. if the UI is shown again.
   #
   # @return [Void]
   def stop

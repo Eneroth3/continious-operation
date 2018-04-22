@@ -6,7 +6,8 @@ module Examples
 # Example of OperationSequence.
 #
 # Adds a HTML dialog opened from *Extensions > Operation Sequence Example*
-# that lets you draw randomly placed points in an operation sequence.
+# that lets you draw randomly placed construction points in an operation
+# sequence.
 module DrawPoints
 
   INSTRUCTIONS =
@@ -26,7 +27,7 @@ module DrawPoints
   @os = OperationSequence.new("Points")
   @dlg = nil
 
-  # Draw a guide point somewhere in the view.
+  # Draw a construction point somewhere in the view.
   def self.draw_point
     model = Sketchup.active_model
     view = model.active_view
@@ -36,9 +37,9 @@ module DrawPoints
     model.active_entities.add_cpoint(point)
   end
 
-  # Draw point as part of operation sequence, meaning that if the previous
-  # operation to the model was within the same sequence, they are merged into
-  # one entry in the undo stack.
+  # Draw point as part of operation sequence, meaning the operation will
+  # seemingly merge into the previous one in the undo stack, if that too was
+  # made within the same sequence.
   def self.sequential_point_draw
     @os.start_operation { draw_point }
   end
