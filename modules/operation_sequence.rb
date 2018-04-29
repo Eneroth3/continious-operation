@@ -137,7 +137,7 @@ class OperationSequence
     end
 
     def observe_app
-      @app_observer ||= AppObserver.new(self)
+      @app_observer ||= AppObserver.new(self, @os)
       Sketchup.remove_observer(@app_observer)
       Sketchup.add_observer(@app_observer)
       observe_model(Sketchup.active_model)
@@ -171,12 +171,20 @@ class OperationSequence
 
     class AppObserver < Sketchup::AppObserver
 
-      def initialize(observers)
+      def initialize(observers, os)
         @observers = observers
+        @os = os
       end
 
       def onActivateModel(model)
         @observers.observe_model(model)
+        # REVIEW: Ideally there should be separate sequences for separate models
+        # somehow. As I don't have access to test the multi document interface
+        # (Mac only) I can't develop that and instead simply interrupt the
+        # sequence on model change. Not doing anything would cause faulty
+        # operation merging if the user switches model while using an operation
+        # sequence.
+        @os.interupt
       end
 
       def onNewModel(model)
